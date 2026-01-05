@@ -14,7 +14,7 @@ bot = commands.Bot(command_prefix='/', intents=intents)
 
 # Groq AI stuff
 client = AsyncGroq(api_key=os.environ['GROQ_API_KEY'])
-system_prompt_url = 'https://raw.githubusercontent.com/GoobApp/backend/refs/heads/main/goofy-goober-system-prompt.txt'
+system_prompt_url = 'https://raw.githubusercontent.com/GoobApp/goobAI-system-prompt/refs/heads/main/prompt.txt'
 system_prompt = ''
 
 try:
@@ -61,5 +61,6 @@ async def on_message(interaction: discord.Interaction, question: str):
     )
 
     await interaction.followup.send(f'{interaction.user.display_name}: {question}\nGoofy Goober: {completion.choices[0].message.content}')
+
 
 bot.run(str(os.environ['DISCORD_BOT_TOKEN']))
