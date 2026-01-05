@@ -1,8 +1,9 @@
-from groq import Groq
+from groq import AsyncGroq
 import discord
 from discord.ext import commands
 import dotenv
 import os
+import requests
 
 dotenv.load_dotenv()
 
@@ -12,18 +13,18 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='/', intents=intents)
 
 # Groq AI stuff
-client = Groq(api_key=os.environ['GROQ_API_KEY'])
-system_prompt_path = './system_prompt.txt'
+client = AsyncGroq(api_key=os.environ['GROQ_API_KEY'])
+system_prompt_url = 'https://raw.githubusercontent.com/GoobApp/backend/refs/heads/main/goofy-goober-system-prompt.txt'
 system_prompt = ''
+
 try:
-    with open(system_prompt_path, 'r', encoding='utf-8') as f:
-        system_prompt = f.read()
-
-except FileNotFoundError:
-    print(f'Error: The file "{system_prompt_path}"" was not found.')
-except Exception as e:
-    print(f'An error occurred: {e}')
-
+    response = requests.get(system_prompt_url)
+    if response.status_code == 200:
+        system_prompt = response.text
+    else:
+        print(f"Failed to retrieve file! Status code: {response.status_code}")
+except requests.exceptions.RequestException as e:
+    print(f"An error occurred: {e}")
 
 @bot.event
 async def on_ready():
@@ -36,7 +37,7 @@ async def on_ready():
 async def on_message(interaction: discord.Interaction, question: str):
     await interaction.response.defer()
 
-    completion = client.chat.completions.create(
+    completion = await client.chat.completions.create(
         model='moonshotai/kimi-k2-instruct-0905',
         messages=[
         {
